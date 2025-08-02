@@ -1,0 +1,153 @@
+import { StyleSheet } from "react-native";
+
+const styles = StyleSheet.create({
+  bg: {
+    flex: 1,
+    backgroundColor: "#f8fafd",
+    paddingTop: 40,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: 20,
+    borderRadius: 16,
+    margin: 20,
+    marginBottom: 10,
+    elevation: 3,
+  },
+  title: {
+    fontSize: 24,
+    color: "#3ba4e6",
+    fontWeight: "bold",
+    marginTop: 20,
+    
+  },
+  inputArea: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginHorizontal: 20,
+    marginBottom: 16,
+    backgroundColor: "#e3f2fd",
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  input: {
+    flex: 1,
+    fontSize: 16,
+    color: "#222",
+    paddingVertical: 8,
+  },
+  addBtn: {
+    backgroundColor: "#3ba4e6",
+    borderRadius: 10,
+    padding: 8,
+    marginLeft: 8,
+  },
+  list: {
+    marginHorizontal: 20,
+  },
+  itemRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 8,
+    elevation: 1,
+    justifyContent: "space-between",
+  },
+  itemText: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  emptyText: {
+    textAlign: "center",
+    color: "#888",
+    marginTop: 40,
+    fontSize: 15,
+  },
+  categoriaBtn: {
+    marginBottom: 20,
+    borderRadius: 18,
+    overflow: "hidden",
+    elevation: 4,
+    shadowColor: "#3E6A85",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+  },
+  categoriaGradient: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 22,
+    borderRadius: 18,
+  },
+  iconArea: {
+    backgroundColor: "rgba(255,255,255,0.18)",
+    borderRadius: 12,
+    padding: 10,
+    marginRight: 4,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  categoriaText: {
+    fontSize: 20,
+    color: "#fff",
+    fontWeight: "bold",
+    marginBottom: 8,
+    letterSpacing: 0.5,
+  },
+  progressBarContainer: {
+    height: 10,
+    backgroundColor: "rgba(255,255,255,0.25)",
+    borderRadius: 6,
+    marginTop: 2,
+    marginBottom: 2,
+    overflow: "hidden",
+  },
+  progressBar: {
+    height: 10,
+    backgroundColor: "#fff",
+    borderRadius: 6,
+  },
+  progressText: {
+    fontSize: 13,
+    color: "#e3f2fd",
+    marginTop: 2,
+    fontWeight: "bold",
+  },
+  infoText: {
+    fontSize: 14,
+    color: "#e3f2fd",
+    marginBottom: 4,
+    fontWeight: "bold",
+  },
+   tabBar: {
+    
+    flexDirection: "row",
+    backgroundColor: "#fff",
+    paddingVertical: 10,
+    borderTopWidth: 1,
+    borderTopColor: "#e3f2fd",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  tabItem: {
+    alignItems: "center",
+    justifyContent: "center",
+    flex: 1,
+  },
+  tabText: {
+    fontSize: 11,
+    color: "#3ba4e6",
+    marginTop: 2,
+    fontWeight: "bold",
+  },
+});
+
+export default styles;

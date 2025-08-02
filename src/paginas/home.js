@@ -27,8 +27,8 @@ export default function Home({ navigation, route}) {
           </Text>
         </View>
         <View style={style.startButtonContainer}>
-          <TouchableOpacity style={style.startButton}>
-            <Text style={style.startButtonText}  onPress={() => navigation.navigate("Login")}>COMEÇAR</Text>
+          <TouchableOpacity style={style.startButton} onPress={() => navigation.navigate("Login")}>
+            <Text style={style.startButtonText}>COMEÇAR</Text>
           </TouchableOpacity>
         </View>
       </View>
