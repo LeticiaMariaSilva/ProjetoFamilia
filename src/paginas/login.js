@@ -12,11 +12,13 @@ import styles from "../componentes/styleLogin";
 import {LoginApi} from "../servicos/api";
 import { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Icon from "react-native-vector-icons/MaterialIcons";
 
 export default function Login({ navigation, route}) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [MostrarSenha, setMostrarSenha] = useState(false);
 
   const itensLogin = route.params?.itensLogin;
 
@@ -90,7 +92,17 @@ export default function Login({ navigation, route}) {
             color="#4a90e2"
             style={styles.icon}
           />
-          <TextInput placeholder="Senha" value={password} onChangeText={setPassword} style={styles.input} secureTextEntry />
+          <TextInput placeholder="Senha" value={password} onChangeText={setPassword} style={styles.input} secureTextEntry={!MostrarSenha} />
+          <TouchableOpacity
+            onPress={() => setMostrarSenha(!MostrarSenha)}
+            style={styles.eyeIcon}
+          >
+            <Icon
+              name={MostrarSenha ? "visibility" : "visibility-off"}
+              size={22}
+              color="#4a90e2"
+            />
+            </TouchableOpacity>
         </View>
         <TouchableOpacity style={styles.forgotButton}>
           <Text style={styles.forgotText}>Esqueceu senha?</Text>

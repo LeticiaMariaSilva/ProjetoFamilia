@@ -78,6 +78,9 @@ const styles = StyleSheet.create({
     marginTop: 40,
     fontSize: 15,
   },
+  inputStatus: {
+    
+  }
 });
 
 export default styles;

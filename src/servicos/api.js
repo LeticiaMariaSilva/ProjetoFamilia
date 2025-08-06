@@ -6,3 +6,6 @@ export const CadastroApi = axios.create({
 export const LoginApi = axios.create({
     baseURL: "https://api-gerenciador-familiar.vercel.app"
 })
+export const TarefasApi = axios.create({
+    baseURL: "https://api-gerenciador-familiar.vercel.app"
+})
