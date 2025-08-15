@@ -7,14 +7,14 @@ import {
   SafeAreaView,
   Alert,
 } from "react-native";
-import { MaterialIcons, FontAwesome } from "@expo/vector-icons";
+import { MaterialIcons } from "@expo/vector-icons";
 import styles from "../componentes/styleLogin";
-import {LoginApi} from "../servicos/api";
+import { LoginApi } from "../servicos/api";
 import { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Icon from "react-native-vector-icons/MaterialIcons";
 
-export default function Login({ navigation, route}) {
+export default function Login({ navigation, route }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -24,15 +24,14 @@ export default function Login({ navigation, route}) {
 
   useEffect(() => {
     if (itensLogin) {
-      setEmail(itensLogin.email || "")
-      setPassword(itensLogin.password || "")
+      setEmail(itensLogin.email || "");
+      setPassword(itensLogin.password || "");
     }
   }, [itensLogin]);
 
   const LogarUsuario = async () => {
     if (!email || !password) {
       Alert.alert("Erro", "Preencha todos os campos");
-      console.log("Preencha todos os campos");
       return;
     }
 
@@ -40,23 +39,25 @@ export default function Login({ navigation, route}) {
     try {
       const response = await LoginApi.post("/login", { email, password });
       const token = response.data.accessToken;
-      await AsyncStorage.setItem("token", token);
-      console.log("Usuário logado com sucesso");     
+      const userId = response.data.user?.id || response.data.id; // Ajustar se o backend retorna diferente
 
-      if (token) {
-        navigation.navigate("Inicio");
-      } else {
-        Alert.alert("Erro", response.data.message);
+      if (!token || !userId) {
+        Alert.alert("Erro", "Credenciais inválidas");
+        return;
       }
+
+      await AsyncStorage.setItem("token", token);
+      await AsyncStorage.setItem("userId", String(userId));
+
+      console.log("Usuário logado com sucesso");
+      navigation.navigate("Inicio");
     } catch (error) {
       console.error(error);
       Alert.alert("Erro", "Ocorreu um erro ao fazer login");
     } finally {
       setLoading(false);
     }
-  }
-
-
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -69,13 +70,9 @@ export default function Login({ navigation, route}) {
       <View style={styles.content}>
         <Text style={styles.title}>Login</Text>
         <Text style={styles.subtitle}>Preencha os dados abaixo</Text>
+
         <View style={styles.inputContainer}>
-          <MaterialIcons
-            name="email"
-            size={22}
-            color="#4a90e2"
-            style={styles.icon}
-          />
+          <MaterialIcons name="email" size={22} color="#4a90e2" style={styles.icon} />
           <TextInput
             placeholder="Email"
             style={styles.input}
@@ -85,35 +82,35 @@ export default function Login({ navigation, route}) {
             onChangeText={setEmail}
           />
         </View>
+
         <View style={styles.inputContainer}>
-          <MaterialIcons
-            name="lock"
-            size={22}
-            color="#4a90e2"
-            style={styles.icon}
+          <MaterialIcons name="lock" size={22} color="#4a90e2" style={styles.icon} />
+          <TextInput
+            placeholder="Senha"
+            value={password}
+            onChangeText={setPassword}
+            style={styles.input}
+            secureTextEntry={!MostrarSenha}
           />
-          <TextInput placeholder="Senha" value={password} onChangeText={setPassword} style={styles.input} secureTextEntry={!MostrarSenha} />
-          <TouchableOpacity
-            onPress={() => setMostrarSenha(!MostrarSenha)}
-            style={styles.eyeIcon}
-          >
-            <Icon
-              name={MostrarSenha ? "visibility" : "visibility-off"}
-              size={22}
-              color="#4a90e2"
-            />
-            </TouchableOpacity>
+          <TouchableOpacity onPress={() => setMostrarSenha(!MostrarSenha)} style={styles.eyeIcon}>
+            <Icon name={MostrarSenha ? "visibility" : "visibility-off"} size={22} color="#4a90e2" />
+          </TouchableOpacity>
         </View>
+
         <TouchableOpacity style={styles.forgotButton}>
           <Text style={styles.forgotText}>Esqueceu senha?</Text>
         </TouchableOpacity>
+
         <TouchableOpacity
           style={styles.loginButton}
           onPress={LogarUsuario}
           disabled={loading}
         >
-          <Text style={styles.loginButtonText}>{loading ? "Carregando..." : " Entrar"}</Text>
+          <Text style={styles.loginButtonText}>
+            {loading ? "Carregando..." : " Entrar"}
+          </Text>
         </TouchableOpacity>
+
         <Text style={styles.orText}>Ou</Text>
         <View style={styles.socialContainer}>
           <TouchableOpacity style={styles.socialButton}>
@@ -129,6 +126,7 @@ export default function Login({ navigation, route}) {
             />
           </TouchableOpacity>
         </View>
+
         <View style={styles.registerContainer}>
           <Text style={styles.registerText}>Não tem conta? </Text>
           <TouchableOpacity>
@@ -144,3 +142,4 @@ export default function Login({ navigation, route}) {
     </SafeAreaView>
   );
 }
+

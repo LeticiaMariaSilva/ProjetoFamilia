@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   FlatList,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
@@ -14,19 +15,23 @@ import { useIsFocused } from "@react-navigation/native";
 import styles from "../componentes/styleTarefas";
 import { TarefasApi } from "../servicos/api";
 
-export default function Tarefas({ route }) {
+export default function Tarefas({ route, navigation }) {
   const [descricao, setDescricao] = useState("");
   const [tarefas, setTarefas] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [editingTaskId, setEditingTaskId] = useState(null);
   const isFocused = useIsFocused();
 
- 
   useEffect(() => {
     if (route.params?.itensTarefas) {
       setDescricao(route.params.itensTarefas.descricao);
+      setEditingTaskId(route.params.itensTarefas.id);
+    } else {
+      setDescricao("");
+      setEditingTaskId(null);
     }
   }, [route.params?.itensTarefas]);
 
-  
   useEffect(() => {
     if (isFocused) {
       carregarTarefas();
@@ -34,31 +39,105 @@ export default function Tarefas({ route }) {
   }, [isFocused]);
 
   const carregarTarefas = async () => {
+    setIsLoading(true);
     try {
       const token = await AsyncStorage.getItem("token");
-      const response = await TarefasApi.get("/tasks", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      const userId = await AsyncStorage.getItem("userId"); // salvo no login
+
+      if (!token || !userId) {
+        Alert.alert("Erro", "Faça login novamente.");
+        navigation.navigate("Login");
+        return;
+      }
+
+    
+      const response = await TarefasApi.get(`/tasks/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
-      setTarefas(response.data);
+
+      setTarefas(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
-      console.error("Erro ao carregar tarefas:", error);
-      Alert.alert("Erro", "Não foi possível carregar as tarefas");
+      console.error("Erro ao carregar tarefas:", {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+      });
+      Alert.alert(
+        "Erro",
+        error.response?.data?.message || "Não foi possível carregar as tarefas."
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const salvarTarefa = async () => {
-    if (!descricao) {
-      Alert.alert("Erro", "Preencha a descrição da tarefa");
+    if (!descricao.trim()) {
+      Alert.alert("Erro", "A descrição da tarefa não pode estar vazia.");
       return;
     }
 
     try {
       const token = await AsyncStorage.getItem("token");
-      await TarefasApi.post(
-        "/create-task",
-        { descricao },
+      if (!token) {
+        Alert.alert("Erro", "Faça login novamente.");
+        navigation.navigate("Login");
+        return;
+      }
+
+      if (editingTaskId) {
+        await TarefasApi.put(
+          `/update-task/${editingTaskId}`,
+          { descricao, status: false },
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        Alert.alert("Sucesso", "Tarefa atualizada com sucesso");
+      } else {
+        await TarefasApi.post(
+          "/create-task",
+          { descricao },
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        Alert.alert("Sucesso", "Tarefa salva com sucesso");
+      }
+
+      setDescricao("");
+      setEditingTaskId(null);
+      carregarTarefas();
+    } catch (error) {
+      console.error(
+        "Erro ao salvar tarefa:",
+        error.response?.data || error.message
+      );
+      Alert.alert(
+        "Erro",
+        error.response?.data?.message || "Não foi possível salvar a tarefa."
+      );
+    }
+  };
+
+  const marcarFeito = async (id, statusAtual) => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        Alert.alert("Erro", "Faça login novamente.");
+        navigation.navigate("Login");
+        return;
+      }
+
+      await TarefasApi.put(
+        `/update-task/${id}`,
+        { status: !statusAtual },
         {
           headers: {
             "Content-Type": "application/json",
@@ -66,29 +145,43 @@ export default function Tarefas({ route }) {
           },
         }
       );
-      setDescricao(""); 
-      carregarTarefas(); 
-      Alert.alert("Sucesso", "Tarefa salva com sucesso");
+      carregarTarefas();
     } catch (error) {
-      console.error("Erro ao salvar tarefa:", error);
-      Alert.alert("Erro", "Não foi possível salvar a tarefa");
+      console.error(
+        "Erro ao atualizar tarefa:",
+        error.response?.data || error.message
+      );
+      Alert.alert(
+        "Erro",
+        error.response?.data?.message || "Não foi possível atualizar a tarefa."
+      );
     }
   };
 
-  const CheckFeito = async () => {
-
-  }
-
-  const ExcluirTarefa = async () => {
-    try{
-      await TarefasApi.delete(`delete-task/${id}`)
+  const excluirTarefa = async (id) => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        Alert.alert("Erro", "Faça login novamente.");
+        navigation.navigate("Login");
+        return;
+      }
+      await TarefasApi.delete(`/delete-task/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       carregarTarefas();
       Alert.alert("Sucesso", "Tarefa excluída com sucesso");
-    } catch (error){
-      console.error("Erro ao excluir tarefa:", error);
-      Alert.alert("Erro", "Não foi possível excluir a tarefa");
+    } catch (error) {
+      console.error(
+        "Erro ao excluir tarefa:",
+        error.response?.data || error.message
+      );
+      Alert.alert(
+        "Erro",
+        error.response?.data?.message || "Não foi possível excluir a tarefa."
+      );
     }
-  }
+  };
 
   return (
     <View style={styles.bg}>
@@ -104,53 +197,84 @@ export default function Tarefas({ route }) {
           placeholderTextColor="#3ba4e6"
           value={descricao}
           onChangeText={setDescricao}
+          accessibilityLabel="Digite uma nova tarefa"
         />
-        <TouchableOpacity style={styles.addBtn} onPress={salvarTarefa}>
-          <Icon name="plus" size={24} color="#fff" />
+        <TouchableOpacity
+          style={styles.addBtn}
+          onPress={salvarTarefa}
+          accessibilityLabel={
+            editingTaskId ? "Atualizar tarefa" : "Adicionar tarefa"
+          }
+        >
+          <Icon
+            name={editingTaskId ? "update" : "plus"}
+            size={24}
+            color="#fff"
+          />
         </TouchableOpacity>
       </View>
 
-      <FlatList
-        data={tarefas}
-        keyExtractor={(item) => item.id.toString()}
-        style={styles.list}
-        renderItem={({ item }) => (
-          <LinearGradient
-            colors={
-              item.feito ? ["#90caf9", "#e3f2fd"] : ["#6EBBEB", "#3ba4e6"]
-            }
-            style={styles.itemCard}
-          >
-            <View style={styles.itemRow}>
-              <TouchableOpacity onPress={() => marcarFeito(item.id)}>
-                <Icon
-                  name={
-                    item.feito
-                      ? "check-circle"
-                      : "checkbox-blank-circle-outline"
+      {isLoading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#66bb6a" />
+          <Text style={styles.loadingText}>Carregando tarefas...</Text>
+        </View>
+      ) : tarefas.length === 0 ? (
+        <Text style={styles.emptyText}>Nenhuma tarefa disponível</Text>
+      ) : (
+        <FlatList
+          data={tarefas}
+          keyExtractor={(item) => item.id.toString()}
+          style={styles.list}
+          renderItem={({ item }) => (
+            <LinearGradient
+              colors={
+                item.status ? ["#90caf9", "#e3f2fd"] : ["#6EBBEB", "#3ba4e6"]
+              }
+              style={styles.itemCard}
+            >
+              <View style={styles.itemRow}>
+                <TouchableOpacity
+                  onPress={() => marcarFeito(item.id, item.status)}
+                  accessibilityLabel={
+                    item.status
+                      ? "Desmarcar tarefa"
+                      : "Marcar tarefa como concluída"
                   }
-                  size={26}
-                  color={item.feito ? "#4caf50" : "#3ba4e6"}
-                />
-              </TouchableOpacity>
-              <Text
-                style={[
-                  styles.itemText,
-                  item.feito && {
-                    textDecorationLine: "line-through",
-                    color: "#888",
-                  },
-                ]}
-              >
-                {item.descricao}
-              </Text>
-              <TouchableOpacity onPress={ExcluirTarefa}>
-                <Icon name="delete-outline" size={22} color="#f44336" />
-              </TouchableOpacity>
-            </View>
-          </LinearGradient>
-        )}
-      />
+                >
+                  <Icon
+                    name={
+                      item.status
+                        ? "check-circle"
+                        : "checkbox-blank-circle-outline"
+                    }
+                    size={26}
+                    color={item.status ? "#4caf50" : "#3ba4e6"}
+                  />
+                </TouchableOpacity>
+                <Text
+                  style={[
+                    styles.itemText,
+                    item.status && {
+                      textDecorationLine: "line-through",
+                      color: "#888",
+                    },
+                  ]}
+                >
+                  {item.descricao}
+                </Text>
+                <TouchableOpacity
+                  onPress={() => excluirTarefa(item.id)}
+                  accessibilityLabel="Excluir tarefa"
+                >
+                  <Icon name="delete-outline" size={22} color="#f44336" />
+                </TouchableOpacity>
+              </View>
+            </LinearGradient>
+          )}
+        />
+      )}
     </View>
   );
 }
+

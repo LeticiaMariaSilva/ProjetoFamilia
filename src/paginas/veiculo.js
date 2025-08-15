@@ -1,59 +1,176 @@
-import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, FlatList } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  FlatList,
+  Alert,
+  ActivityIndicator,
+} from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { LinearGradient } from "expo-linear-gradient";
+import { useIsFocused } from "@react-navigation/native";
 import styles from "../componentes/styleVeiculos";
+import { VeiculosApi } from "../servicos/api";
 
-export default function Veiculo() {
-  const [nome, setNome] = useState("");
+export default function Veiculo({ route, navigation }) {
+  const [marca, setMarca] = useState("");
+  const [modelo, setModelo] = useState("");
+  const [ano, setAno] = useState(0);
   const [placa, setPlaca] = useState("");
-  const [ano, setAno] = useState("");
-  const [lembrete, setLembrete] = useState("");
-  const [lista, setLista] = useState([
-    {
-      id: "1",
-      nome: "Carro - Fiat Uno",
-      placa: "ABC-1234",
-      ano: "2012",
-      lembrete: "IPVA vence em setembro",
-    },
-    {
-      id: "2",
-      nome: "Moto - Honda CG",
-      placa: "XYZ-5678",
-      ano: "2018",
-      lembrete: "Troca de óleo em 15/08",
-    },
-    {
-      id: "3",
-      nome: "Bicicleta - Caloi",
-      placa: "",
-      ano: "2020",
-      lembrete: "Revisão anual pendente",
-    },
-  ]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [editingVeiculosId, setEditingVeiculoId] = useState(null);
+  const [veiculos, setVeiculos] = useState([]);
+  const isFocused = useIsFocused();
 
-  function adicionarVeiculo() {
-    if (nome.trim() === "") return;
-    setLista([
-      ...lista,
-      {
-        id: Date.now().toString(),
-        nome,
-        placa,
-        ano,
-        lembrete,
-      },
-    ]);
-    setNome("");
-    setPlaca("");
-    setAno("");
-    setLembrete("");
-  }
+  useEffect(() => {
+    if (route.params?.itensVeiculos) {
+      setMarca(route.params.itensVeiculos.marca);
+      setModelo(route.params.itensVeiculos.modelo);
+      setAno(route.params.itensVeiculos.ano);
+      setPlaca(route.params.itensVeiculos.placa);
+      setEditingVeiculoId(route.params.itensVeiculos.id);
+    } else {
+      setMarca("");
+      setModelo("");
+      setAno(0);
+      setPlaca("");
+      setEditingVeiculoId(null);
+    }
+  }, [route.params?.itensVeiculos]);
 
-  function removerVeiculo(id) {
-    setLista(lista.filter((item) => item.id !== id));
-  }
+  useEffect(() => {
+    if (isFocused) {
+      carregarVeiculos();
+    }
+  }, [isFocused]);
+
+  const carregarVeiculos = async () => {
+    setIsLoading(true);
+    try {
+      const token = await AsyncStorage.getItem("token");
+      const userId = await AsyncStorage.getItem("userId");
+      console.log("Token:", token);
+      console.log("UserId:", userId);
+      if (!token || !userId) {
+        Alert.alert("Erro", "Faça login novamente.");
+        navigation.navigate("Login");
+        return;
+      }
+      console.log(userId);
+      const response = await VeiculosApi.get(`/vehicles`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setVeiculos(Array.isArray(response.data) ? response.data : []);
+    } catch (error) {
+      console.error("Erro ao carregar veículos:", {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+      });
+      Alert.alert(
+        "Erro",
+        error.response?.data?.message ||
+          `Não foi possível carregar os veículos. Verifique o endpoint /veiculos/${userId}.`
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const salvarVeiculo = async () => {
+    if (!marca.trim() || !modelo.trim() || !ano.trim() || !placa.trim()) {
+      Alert.alert("Erro", "Preencha todos os campos.");
+      return;
+    }
+    try {
+      const token = await AsyncStorage.getItem("token");
+      console.log("Token:", token);
+      if (!token) {
+        Alert.alert("Erro", "Faça o login novamente.");
+        navigation.navigate("Login");
+        return;
+      }
+      const headers = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      };
+      if (editingVeiculosId) {
+        await VeiculosApi.put(
+          `/update-vehicle/${editingVeiculosId}`,
+          { marca, modelo, ano, placa },
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        Alert.alert("Sucesso", "Veículo atualizado com sucesso");
+      } else {
+        await VeiculosApi.post(
+          "/create-vehicle",
+          { marca, modelo, ano, placa },
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        Alert.alert("Sucesso", "Veículo salvo com sucesso");
+      }
+      setMarca("");
+      setModelo("");
+      setAno(0);
+      setPlaca("");
+      setEditingVeiculoId(null);
+      salvarVeiculo()
+      console.log(data, typeof(ano));
+
+    } catch (error) {
+      console.error("Erro ao salvar veículo:", {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+      });
+      Alert.alert(
+        "Erro",
+        error.response?.data?.message ||
+          `Não foi possível salvar o veículo. Verifique se o endpoint está correto.`
+      );
+    }
+  };
+
+  const excluirVeiculo = async (id) => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      console.log("Token:", token);
+      if (!token) {
+        Alert.alert("Erro", "Faça o login novamente.");
+        navigation.navigate("Login");
+        return;
+      }
+      await VeiculosApi.delete(`/delete-vehicle/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      carregarVeiculos();
+      Alert.alert("Sucesso", "Veículo excluído com sucesso");
+    } catch (error) {
+      console.error("Erro ao excluir veículo:", {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+      });
+      Alert.alert(
+        "Erro",
+        error.response?.data?.message ||
+          `Não foi possível excluir o veículo. Verifique se o endpoint está correto.`
+      );
+    }
+  };
 
   return (
     <View style={styles.bg}>
@@ -65,17 +182,17 @@ export default function Veiculo() {
       <View style={styles.inputCard}>
         <TextInput
           style={styles.input}
-          placeholder="Nome do veículo"
+          placeholder="Marca do veículo"
           placeholderTextColor="#3ba4e6"
-          value={nome}
-          onChangeText={setNome}
+          value={marca}
+          onChangeText={setMarca}
         />
         <TextInput
           style={styles.input}
-          placeholder="Placa"
+          placeholder="Modelo do veículo"
           placeholderTextColor="#3ba4e6"
-          value={placa}
-          onChangeText={setPlaca}
+          value={modelo}
+          onChangeText={setModelo}
         />
         <TextInput
           style={styles.input}
@@ -87,54 +204,70 @@ export default function Veiculo() {
         />
         <TextInput
           style={styles.input}
-          placeholder="Lembrete de manutenção"
+          placeholder="Placa - ABC1287"
           placeholderTextColor="#3ba4e6"
-          value={lembrete}
-          onChangeText={setLembrete}
+          value={placa}
+          onChangeText={setPlaca}
         />
-        <TouchableOpacity style={styles.addBtn} onPress={adicionarVeiculo}>
-          <Icon name="plus" size={24} color="#fff" />
+        <TouchableOpacity
+          style={styles.addBtn}
+          onPress={salvarVeiculo}
+          accessibilityLabel={
+            editingVeiculosId ? "Atualizar veículo" : "Adicionar veículo"
+          }
+        >
+          <Icon
+            name={editingVeiculosId ? "update" : "plus"}
+            size={24}
+            color="#fff"
+          />
         </TouchableOpacity>
       </View>
 
-      <FlatList
-        data={lista}
-        keyExtractor={(item) => item.id}
-        style={styles.list}
-        renderItem={({ item }) => (
-          <LinearGradient
-            colors={["#6EBBEB", "#3E6A85"]}
-            style={styles.itemCard}
-          >
-            <View style={styles.itemRow}>
-              <Icon
-                name="car"
-                size={28}
-                color="#3E6A85"
-                style={{ marginRight: 10 }}
-              />
-              <View style={{ flex: 1 }}>
-                <Text style={styles.itemTitle}>{item.nome}</Text>
-                {item.placa ? (
-                  <Text style={styles.itemInfo}>Placa: {item.placa}</Text>
-                ) : null}
-                {item.ano ? (
-                  <Text style={styles.itemInfo}>Ano: {item.ano}</Text>
-                ) : null}
-                {item.lembrete ? (
-                  <Text style={styles.itemLembrete}>{item.lembrete}</Text>
-                ) : null}
+      {isLoading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#3E6A85" />
+          <Text style={styles.loadingText}>Carregando veículos...</Text>
+        </View>
+      ) : veiculos.length === 0 ? (
+        <Text style={styles.emptyText}> Nenhum veículo cadastrado</Text>
+      ) : (
+        <FlatList
+          data={veiculos}
+          keyExtractor={(item) => item.id.toString()}
+          style={styles.list}
+          renderItem={({ item }) => (
+            <LinearGradient
+              colors={["#6EBBEB", "#3E6A85"]}
+              style={styles.itemCard}
+            >
+              <View style={styles.itemRow}>
+                <Icon
+                  name="car"
+                  size={28}
+                  color="#3E6A85"
+                  style={{ marginRight: 10 }}
+                />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.itemTitle}>{item.marca}</Text>
+                  {item.modelo ? (
+                    <Text style={styles.itemInfo}>Modelo: {item.modelo}</Text>
+                  ) : null}
+                  {item.ano ? (
+                    <Text style={styles.itemInfo}>Ano: {item.ano}</Text>
+                  ) : null}
+                  {item.placa ? (
+                    <Text style={styles.itemLembrete}>{item.placa}</Text>
+                  ) : null}
+                </View>
+                <TouchableOpacity onPress={() => excluirVeiculo(item.id)}>
+                  <Icon name="delete-outline" size={24} color="#f44336" />
+                </TouchableOpacity>
               </View>
-              <TouchableOpacity onPress={() => removerVeiculo(item.id)}>
-                <Icon name="delete-outline" size={24} color="#f44336" />
-              </TouchableOpacity>
-            </View>
-          </LinearGradient>
-        )}
-        ListEmptyComponent={
-          <Text style={styles.emptyText}>Nenhum veículo cadastrado.</Text>
-        }
-      />
+            </LinearGradient>
+          )}
+        />
+      )}
     </View>
   );
 }
