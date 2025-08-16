@@ -22,6 +22,7 @@ export default function Tarefas({ route, navigation }) {
   const [editingTaskId, setEditingTaskId] = useState(null);
   const isFocused = useIsFocused();
 
+  // Preenche campos se veio algo para edição pela rota
   useEffect(() => {
     if (route.params?.itensTarefas) {
       setDescricao(route.params.itensTarefas.descricao);
@@ -32,6 +33,7 @@ export default function Tarefas({ route, navigation }) {
     }
   }, [route.params?.itensTarefas]);
 
+  // Recarrega ao voltar para a tela
   useEffect(() => {
     if (isFocused) {
       carregarTarefas();
@@ -42,7 +44,7 @@ export default function Tarefas({ route, navigation }) {
     setIsLoading(true);
     try {
       const token = await AsyncStorage.getItem("token");
-      const userId = await AsyncStorage.getItem("userId"); // salvo no login
+      const userId = await AsyncStorage.getItem("userId");
 
       if (!token || !userId) {
         Alert.alert("Erro", "Faça login novamente.");
@@ -50,7 +52,6 @@ export default function Tarefas({ route, navigation }) {
         return;
       }
 
-    
       const response = await TarefasApi.get(`/tasks/${userId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -126,7 +127,7 @@ export default function Tarefas({ route, navigation }) {
     }
   };
 
-  const marcarFeito = async (id, statusAtual) => {
+  const marcarFeito = async (id, statusAtual, descricaoAtual) => {
     try {
       const token = await AsyncStorage.getItem("token");
       if (!token) {
@@ -135,9 +136,10 @@ export default function Tarefas({ route, navigation }) {
         return;
       }
 
+      // Envia status e descrição para evitar erro no backend
       await TarefasApi.put(
         `/update-task/${id}`,
-        { status: !statusAtual },
+        { descricao: descricaoAtual, status: !statusAtual },
         {
           headers: {
             "Content-Type": "application/json",
@@ -234,8 +236,9 @@ export default function Tarefas({ route, navigation }) {
               style={styles.itemCard}
             >
               <View style={styles.itemRow}>
+                {/* Botão concluir/desmarcar */}
                 <TouchableOpacity
-                  onPress={() => marcarFeito(item.id, item.status)}
+                  onPress={() => marcarFeito(item.id, item.status, item.descricao)}
                   accessibilityLabel={
                     item.status
                       ? "Desmarcar tarefa"
@@ -252,6 +255,8 @@ export default function Tarefas({ route, navigation }) {
                     color={item.status ? "#4caf50" : "#3ba4e6"}
                   />
                 </TouchableOpacity>
+
+                {/* Texto da tarefa */}
                 <Text
                   style={[
                     styles.itemText,
@@ -263,6 +268,19 @@ export default function Tarefas({ route, navigation }) {
                 >
                   {item.descricao}
                 </Text>
+
+                {/* Botão editar */}
+                <TouchableOpacity
+                  onPress={() => {
+                    setDescricao(item.descricao);
+                    setEditingTaskId(item.id);
+                  }}
+                  accessibilityLabel="Editar tarefa"
+                >
+                  <Icon name="pencil-outline" size={22} color="#4caf50" />
+                </TouchableOpacity>
+
+                {/* Botão excluir */}
                 <TouchableOpacity
                   onPress={() => excluirTarefa(item.id)}
                   accessibilityLabel="Excluir tarefa"
@@ -274,7 +292,28 @@ export default function Tarefas({ route, navigation }) {
           )}
         />
       )}
+      <View style={styles.tabBar}>
+        <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate("Inicio")}>
+          <Icon name="home-outline" size={24} color="#3ba4e6" />
+          <Text style={styles.tabText}>Início</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.tabItem]} onPress={() => navigation.navigate("Compras")}>
+          <Icon name="cart-outline" size={24} color="#3ba4e6" />
+          <Text style={[styles.tabText, { color: "#3ba4e6" }]}>Compras</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate("Veiculo")}>
+          <Icon name="car-outline" size={24} color="#3ba4e6" />
+          <Text style={styles.tabText}>Veículos</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate("Tarefas")}>
+          <Icon name="check-circle" size={24} color="#3ba4e6" />
+          <Text style={styles.tabText}>Tarefas</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate("Perfil")}>
+          <Icon name="account-circle-outline" size={24} color="#3ba4e6" />
+          <Text style={styles.tabText}>Perfil</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
-

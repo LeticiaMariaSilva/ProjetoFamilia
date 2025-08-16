@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -12,6 +12,10 @@ import {
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { LinearGradient } from "expo-linear-gradient";
 import styles from "../componentes/stylePerfil";
+import { useIsFocused } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { PerfilApi } from "../servicos/api";
+
 
 const membros = [
   { id: "1", nome: "Alex Silva", tipo: "Administrador" },
@@ -20,12 +24,60 @@ const membros = [
   { id: "4", nome: "João Silva", tipo: "Filho" },
 ];
 
-export default function Perfil() {
+export default function Perfil({ route, navigate}) {
   const [modalVisible, setModalVisible] = useState(false);
-  const [nome, setNome] = useState("Alex Silva");
-  const [email, setEmail] = useState("alex.silva@email.com");
-  const [telefone, setTelefone] = useState("(11) 91234-5678");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [usuario, setUsuario] = useState("");
+  const [passarword, setPassarword] = useState("");
   const [notificacoes, setNotificacoes] = useState(true);
+  const [editingUserId, setEditingUserId] = useState(null)
+   const isFocused = useIsFocused();
+
+  useEffect(() => {
+    if(route.params?.itensPerfil){
+      setName(route.params.itensPerfil.nome)
+      setEmail(route.params.itensPerfil.email)
+      setPassarword(route.params.itensPerfil.passarword)
+      setEditingUserId(route.params.itensPerfil.id)
+    } else {
+      setName("")
+      setEmail("")
+      setPassarword("")
+      setEditingUserId(null)
+    }
+  }, [route.params?.itensPerfil])
+  
+  useEffect(() => {
+    if (isFocused) {
+      carregarPerfil();
+    
+    }
+  }, [isFocused])
+
+  const carregarPerfil = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token")
+      const userId = await AsyncStorage.getItem("userId")
+
+      if(!token || !userId){
+        Alert.alert("Erro", "Faça login novamente")
+        NavigationActivation.navigate("Login")
+        return
+      }
+      const response = await PerfilApi.get(`/user/${userId}`, {
+        headers: { Authorization: `Bearer ${token}`},
+      })
+      setUsuario(response.data)
+    } catch (error) {
+      console.error("Erro ao carregar perfil", {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data
+      })
+      Alert.alert("Erro", error.response?.data?.message ||"Erro ao carregar perfil")
+    }
+  }
 
   function salvarEdicao() {
     setModalVisible(false);
@@ -60,18 +112,13 @@ export default function Perfil() {
       <View style={styles.infoCard}>
         <View style={styles.infoRow}>
           <Icon name="account" size={22} color="#3ba4e6" />
-          <Text style={styles.infoLabel}>Nome:</Text>
-          <Text style={styles.infoText}>{nome}</Text>
+          <Text style={styles.infoLabel} >Nome:</Text>
+          <Text style={styles.infoText}>{}</Text>
         </View>
         <View style={styles.infoRow}>
           <Icon name="email" size={22} color="#3ba4e6" />
           <Text style={styles.infoLabel}>Email:</Text>
           <Text style={styles.infoText}>{email}</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <Icon name="cellphone" size={22} color="#3ba4e6" />
-          <Text style={styles.infoLabel}>Telefone:</Text>
-          <Text style={styles.infoText}>{telefone}</Text>
         </View>
         <TouchableOpacity style={styles.editBtn} onPress={() => setModalVisible(true)}>
           <Icon name="pencil" size={20} color="#fff" />
@@ -126,8 +173,8 @@ export default function Perfil() {
             <Text style={styles.modalTitle}>Editar Perfil</Text>
             <TextInput
               style={styles.modalInput}
-              value={nome}
-              onChangeText={setNome}
+              value={name}
+              onChangeText={setName}
               placeholder="Nome"
             />
             <TextInput
@@ -137,13 +184,7 @@ export default function Perfil() {
               placeholder="Email"
               keyboardType="email-address"
             />
-            <TextInput
-              style={styles.modalInput}
-              value={telefone}
-              onChangeText={setTelefone}
-              placeholder="Telefone"
-              keyboardType="phone-pad"
-            />
+           
             <View style={styles.modalBtns}>
               <TouchableOpacity style={styles.saveBtn} onPress={salvarEdicao}>
                 <Icon name="check" size={20} color="#fff" />
@@ -157,6 +198,7 @@ export default function Perfil() {
           </View>
         </View>
       </Modal>
+      
     </ScrollView>
   );
 }

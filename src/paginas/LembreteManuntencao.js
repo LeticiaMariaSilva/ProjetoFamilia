@@ -283,28 +283,6 @@ export default function Veiculo({ route, navigation }) {
           )}
         />
       )}
-      <View style={styles.tabBar}>
-        <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate("Inicio")}>
-          <Icon name="home-outline" size={24} color="#3ba4e6" />
-          <Text style={styles.tabText}>Início</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.tabItem]} onPress={() => navigation.navigate("Compras")}>
-          <Icon name="cart-outline" size={24} color="#3ba4e6" />
-          <Text style={[styles.tabText, { color: "#3ba4e6" }]}>Compras</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate("Veiculo")}>
-          <Icon name="car" size={24} color="#3ba4e6" />
-          <Text style={styles.tabText}>Veículos</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate("Tarefas")}>
-          <Icon name="check-circle-outline" size={24} color="#3ba4e6" />
-          <Text style={styles.tabText}>Tarefas</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate("Perfil")}>
-          <Icon name="account-circle-outline" size={24} color="#3ba4e6" />
-          <Text style={styles.tabText}>Perfil</Text>
-        </TouchableOpacity>
-      </View>
     </View>
   );
 }

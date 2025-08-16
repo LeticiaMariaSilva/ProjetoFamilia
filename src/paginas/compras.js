@@ -4,7 +4,7 @@ import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { LinearGradient } from "expo-linear-gradient";
 import styles from "../componentes/styleCompras";
 
-export default function Compras() {
+export default function Compras ({ navigation}) {
   return (
     <View style={styles.bg}>
       <View
@@ -22,7 +22,7 @@ export default function Compras() {
             backgroundColor: "#3ba4e6",
             borderRadius: 12,
             padding: 8,
-            marginTop: 20
+            marginTop: 20,
           }}
         >
           <Icon name="plus" size={24} color="#fff" />
@@ -94,34 +94,29 @@ export default function Compras() {
             </LinearGradient>
           </TouchableOpacity>
         )}
-        
       />
       <View style={styles.tabBar}>
-  <TouchableOpacity style={styles.tabItem}>
-    <Icon name="home" size={24} color="#3ba4e6" />
-    <Text style={styles.tabText}>Início</Text>
-  </TouchableOpacity>
-  <TouchableOpacity style={[styles.tabItem, { backgroundColor: "#3ba4e6", borderRadius: 16 }]}>
-    <Icon name="cart" size={24} color="#fff" />
-    <Text style={[styles.tabText, { color: "#fff" }]}>Compras</Text>
-  </TouchableOpacity>
-  <TouchableOpacity style={styles.tabItem}>
-    <Icon name="bell-outline" size={24} color="#3ba4e6" />
-    <Text style={styles.tabText}>Lembretes</Text>
-  </TouchableOpacity>
-  <TouchableOpacity style={styles.tabItem}>
-    <Icon name="car-outline" size={24} color="#3ba4e6" />
-    <Text style={styles.tabText}>Veículos</Text>
-  </TouchableOpacity>
-  <TouchableOpacity style={styles.tabItem}>
-    <Icon name="check-circle-outline" size={24} color="#3ba4e6" />
-    <Text style={styles.tabText}>Tarefas</Text>
-  </TouchableOpacity>
-  <TouchableOpacity style={styles.tabItem}>
-    <Icon name="account-circle-outline" size={24} color="#3ba4e6" />
-    <Text style={styles.tabText}>Perfil</Text>
-  </TouchableOpacity>
-</View>
+        <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate("Inicio")}>
+          <Icon name="home-outline" size={24} color="#3ba4e6" />
+          <Text style={styles.tabText}>Início</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.tabItem]}>
+          <Icon name="cart" size={24} color="#3ba4e6" />
+          <Text style={[styles.tabText, { color: "#3ba4e6" }]}>Compras</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate("Veiculo")}>
+          <Icon name="car-outline" size={24} color="#3ba4e6" />
+          <Text style={styles.tabText}>Veículos</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate("Tarefas")}>
+          <Icon name="check-circle-outline" size={24} color="#3ba4e6" />
+          <Text style={styles.tabText}>Tarefas</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate("Perfil")}>
+          <Icon name="account-circle-outline" size={24} color="#3ba4e6" />
+          <Text style={styles.tabText}>Perfil</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }

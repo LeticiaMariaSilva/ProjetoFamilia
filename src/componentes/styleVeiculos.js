@@ -87,6 +87,31 @@ const styles = StyleSheet.create({
     marginTop: 40,
     fontSize: 15,
   },
+  tabBar: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "#e3f2fd",
+    flexDirection: "row",
+    justifyContent: "space-around",
+    height: 60,
+    height: 60,
+    borderTopWidth: 1,
+    borderTopColor: "#cfd8dc",
+    paddingBottom: 4,
+  },
+  tabItem: {
+    alignItems: "center",
+    justifyContent: "center",
+    flex: 1,
+  },
+  tabText: {
+    fontSize: 11,
+    color: "#3ba4e6",
+    marginTop: 2,
+    fontWeight: "bold",
+  },
 });
 
 export default styles;
