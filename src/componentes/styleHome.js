@@ -13,7 +13,7 @@ const style = StyleSheet.create({
     paddingVertical: 12,
   },
   imageTasks: {
-    width: 360,
+    width: '100%',
     height: 390,
   },
   header: {

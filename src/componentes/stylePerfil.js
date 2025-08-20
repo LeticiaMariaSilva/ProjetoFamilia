@@ -246,6 +246,23 @@ const styles = StyleSheet.create({
     marginTop: 2,
     fontWeight: "bold",
   },
+  backBtn: {
+  position: "absolute",
+  left: 15,
+  top: 15,
+  zIndex: 10,
+},
+modalInputContainer: {
+  flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderColor: "#b3d6f2",
+    borderWidth: 2,
+    borderRadius: 20,
+    marginBottom: 12,
+    paddingHorizontal: 12,
+    width: "100%",
+}
 });
 
 export default styles;

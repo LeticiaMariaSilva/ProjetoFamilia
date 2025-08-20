@@ -11,12 +11,15 @@ import styles from "../componentes/styleCadastro";
 import { MaterialIcons, FontAwesome6 } from "@expo/vector-icons";
 import React, { useState, useEffect } from "react";
 import { CadastroApi } from "../servicos/api";
+import Icon from "react-native-vector-icons/MaterialIcons";
 
 export default function Cadastro({ navigation, route }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [MostrarSenha, setMostrarSenha] = useState(false);
+
 
   const itensCadastro = route.params?.itensCadastro;
 
@@ -126,11 +129,14 @@ export default function Cadastro({ navigation, route }) {
           <TextInput
             placeholder="Senha"
             style={styles.input}
-            secureTextEntry={true}
+            secureTextEntry={!MostrarSenha}
             value={password}
             onChangeText={setPassword}
             autoCapitalize="none"
           />
+        <TouchableOpacity onPress={() => setMostrarSenha(!MostrarSenha)} style={styles.eyeIcon}>
+            <Icon name={MostrarSenha ? "visibility" : "visibility-off"} size={22} color="#4a90e2" />
+          </TouchableOpacity>
         </View>
         <TouchableOpacity
           style={[styles.loginButton, loading && { opacity: 0.6 }]}

@@ -9,9 +9,7 @@ import Compras from "./src/paginas/compras";
 import Veiculo from "./src/paginas/veiculo";
 import Tarefas from "./src/paginas/tarefas";
 import Perfil from "./src/paginas/perfil";
-
-
-
+import LembreteDeManutencao from "./src/paginas/LembreteManuntencao";
 
 const Stack = createNativeStackNavigator()
 
@@ -26,7 +24,10 @@ export default function App() {
       <Stack.Screen name="Compras" component={Compras} options={{headerShown: false}}/>
       <Stack.Screen name="Veiculo" component={Veiculo} options={{headerShown: false}}/>
       <Stack.Screen name="Tarefas" component={Tarefas} options={{headerShown: false}}/>
-      <Stack.Screen name="Perfil" component={Perfil} options={{headerShown: false}}/>
+      <Stack.Screen name="Perfil" component={Perfil} options={{headerShown: false} }/>
+      
+      <Stack.Screen name="LembreteDeManutencao" component={LembreteDeManutencao} options={{headerShown: false} }/>
+      
     </Stack.Navigator>
     </NavigationContainer>
   )

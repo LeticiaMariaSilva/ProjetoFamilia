@@ -248,12 +248,13 @@ export default function Veiculo({ route, navigation }) {
               colors={["#6EBBEB", "#3E6A85"]}
               style={styles.itemCard}
             >
-              <View style={styles.itemRow}>
+              <View style={styles.itemRow} >
                 <Icon
                   name="car"
                   size={28}
                   color="#3E6A85"
                   style={{ marginRight: 10 }}
+                  onPress={() => navigation.navigate("LembreteDeManutencao")}
                 />
                 <View style={{ flex: 1 }}>
                   <Text style={styles.itemTitle}>{item.marca}</Text>

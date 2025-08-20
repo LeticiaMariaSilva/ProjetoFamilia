@@ -1,10 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, TouchableOpacity, ScrollView, Image } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import styles from "../componentes/styleInicio";
 import { LinearGradient } from "expo-linear-gradient";
 
 export default function Inicio({ navigation }) {
+  const [name, setName] = useState("")
+  
+
+
   return (
     <View style={styles.bg}>
       <ScrollView

@@ -72,7 +72,12 @@ export default function Login({ navigation, route }) {
         <Text style={styles.subtitle}>Preencha os dados abaixo</Text>
 
         <View style={styles.inputContainer}>
-          <MaterialIcons name="email" size={22} color="#4a90e2" style={styles.icon} />
+          <MaterialIcons
+            name="email"
+            size={22}
+            color="#4a90e2"
+            style={styles.icon}
+          />
           <TextInput
             placeholder="Email"
             style={styles.input}
@@ -84,7 +89,12 @@ export default function Login({ navigation, route }) {
         </View>
 
         <View style={styles.inputContainer}>
-          <MaterialIcons name="lock" size={22} color="#4a90e2" style={styles.icon} />
+          <MaterialIcons
+            name="lock"
+            size={22}
+            color="#4a90e2"
+            style={styles.icon}
+          />
           <TextInput
             placeholder="Senha"
             value={password}
@@ -92,8 +102,15 @@ export default function Login({ navigation, route }) {
             style={styles.input}
             secureTextEntry={!MostrarSenha}
           />
-          <TouchableOpacity onPress={() => setMostrarSenha(!MostrarSenha)} style={styles.eyeIcon}>
-            <Icon name={MostrarSenha ? "visibility" : "visibility-off"} size={22} color="#4a90e2" />
+          <TouchableOpacity
+            onPress={() => setMostrarSenha(!MostrarSenha)}
+            style={styles.eyeIcon}
+          >
+            <Icon
+              name={MostrarSenha ? "visibility" : "visibility-off"}
+              size={22}
+              color="#4a90e2"
+            />
           </TouchableOpacity>
         </View>
 
@@ -142,4 +159,3 @@ export default function Login({ navigation, route }) {
     </SafeAreaView>
   );
 }
-
