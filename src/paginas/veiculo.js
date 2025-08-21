@@ -145,30 +145,43 @@ export default function Veiculo({ route, navigation }) {
   };
 
   const excluirVeiculo = async (id) => {
-    try {
-      const token = await AsyncStorage.getItem("token");
-      if (!token) {
-        Alert.alert("Erro", "Faça o login novamente.");
-        navigation.navigate("Login");
-        return;
-      }
-      await VeiculosApi.delete(`/delete-vehicle/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      carregarVeiculos();
-      Alert.alert("Sucesso", "Veículo excluído com sucesso");
-    } catch (error) {
-      console.error("Erro ao excluir veículo:", {
-        message: error.message,
-        status: error.response?.status,
-        data: error.response?.data,
-      });
-      Alert.alert(
-        "Erro",
-        error.response?.data?.message ||
-          `Não foi possível excluir o veículo.`
-      );
-    }
+    Alert.alert(
+      "Confirmar exclusão",
+      "Deseja realmente excluir este veículo? Todos os lembretes associados também serão excluídos.",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Excluir",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const token = await AsyncStorage.getItem("token");
+              if (!token) {
+                Alert.alert("Erro", "Faça o login novamente.");
+                navigation.navigate("Login");
+                return;
+              }
+              await VeiculosApi.delete(`/delete-vehicle/${id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+              });
+              carregarVeiculos();
+              Alert.alert("Sucesso", "Veículo excluído com sucesso");
+            } catch (error) {
+              console.error("Erro ao excluir veículo:", {
+                message: error.message,
+                status: error.response?.status,
+                data: error.response?.data,
+              });
+              Alert.alert(
+                "Erro",
+                error.response?.data?.message ||
+                  `Não foi possível excluir o veículo.`
+              );
+            }
+          }
+        }
+      ]
+    );
   };
 
   const editarVeiculo = (item) => {
@@ -177,6 +190,12 @@ export default function Veiculo({ route, navigation }) {
     setAno(String(item.ano));
     setPlaca(item.placa);
     setEditingVeiculoId(item.id);
+  };
+
+  const navegarParaLembretes = (veiculo) => {
+    navigation.navigate("LembreteDeManutencao", {
+      veiculoSelecionado: veiculo
+    });
   };
 
   return (
@@ -205,7 +224,7 @@ export default function Veiculo({ route, navigation }) {
           style={styles.input}
           placeholder="Ano"
           placeholderTextColor="#3ba4e6"
-          value={String(ano)}
+          value={ano}
           onChangeText={setAno}
           keyboardType="numeric"
         />
@@ -237,7 +256,10 @@ export default function Veiculo({ route, navigation }) {
           <Text style={styles.loadingText}>Carregando veículos...</Text>
         </View>
       ) : veiculos.length === 0 ? (
-        <Text style={styles.emptyText}> Nenhum veículo cadastrado</Text>
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>Nenhum veículo cadastrado</Text>
+          <Text style={styles.emptySubText}>Cadastre seu primeiro veículo</Text>
+        </View>
       ) : (
         <FlatList
           data={veiculos}
@@ -248,14 +270,19 @@ export default function Veiculo({ route, navigation }) {
               colors={["#6EBBEB", "#3E6A85"]}
               style={styles.itemCard}
             >
-              <View style={styles.itemRow} >
-                <Icon
-                  name="car"
-                  size={28}
-                  color="#3E6A85"
+              <View style={styles.itemRow}>
+                {/* Ícone do carro que navega para lembretes */}
+                <TouchableOpacity
+                  onPress={() => navegarParaLembretes(item)}
                   style={{ marginRight: 10 }}
-                  onPress={() => navigation.navigate("LembreteDeManutencao")}
-                />
+                >
+                  <Icon
+                    name="car"
+                    size={28}
+                    color="#3E6A85"
+                  />
+                </TouchableOpacity>
+                
                 <View style={{ flex: 1 }}>
                   <Text style={styles.itemTitle}>{item.marca}</Text>
                   {item.modelo ? (
@@ -268,6 +295,7 @@ export default function Veiculo({ route, navigation }) {
                     <Text style={styles.itemLembrete}>{item.placa}</Text>
                   ) : null}
                 </View>
+                
                 {/* Botão de editar */}
                 <TouchableOpacity
                   onPress={() => editarVeiculo(item)}
@@ -275,6 +303,7 @@ export default function Veiculo({ route, navigation }) {
                 >
                   <Icon name="pencil-outline" size={24} color="#4CAF50" />
                 </TouchableOpacity>
+                
                 {/* Botão de excluir */}
                 <TouchableOpacity onPress={() => excluirVeiculo(item.id)}>
                   <Icon name="delete-outline" size={24} color="#f44336" />
@@ -284,6 +313,7 @@ export default function Veiculo({ route, navigation }) {
           )}
         />
       )}
+      
       <View style={styles.tabBar}>
         <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate("Inicio")}>
           <Icon name="home-outline" size={24} color="#3ba4e6" />

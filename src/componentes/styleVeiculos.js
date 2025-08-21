@@ -113,6 +113,13 @@ const styles = StyleSheet.create({
     marginTop: 2,
     fontWeight: "bold",
   },
+  headerTitle: {
+    color: "#fff",
+    fontSize: 22,
+    fontWeight: "bold",
+    textAlign: "center"
+    
+  }
 });
 
 export default styles;

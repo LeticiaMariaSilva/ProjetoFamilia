@@ -21,47 +21,68 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "bold",
   },
-  inputArea: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginHorizontal: 20,
-    marginBottom: 16,
+  inputCard: {
     backgroundColor: "#e3f2fd",
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    borderRadius: 16,
+    marginHorizontal: 20,
+    marginBottom: 18,
+    padding: 16,
+    elevation: 2,
+    justifyContent: "space-between"
+
   },
   input: {
-    flex: 1,
     fontSize: 16,
     color: "#222",
+    backgroundColor: "#fff",
+    borderRadius: 8,
     paddingVertical: 8,
+    paddingHorizontal: 12,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: "#90caf9",
   },
   addBtn: {
-    backgroundColor: "#f44336",
+    backgroundColor: "#3E6A85",
     borderRadius: 10,
-    padding: 8,
-    marginLeft: 8,
+    padding: 10,
+    alignSelf: "flex-end",
+    marginTop: 4,
   },
   list: {
     marginHorizontal: 20,
+    marginBottom: 40,
+  },
+  itemCard: {
+    borderRadius: 14,
+    marginBottom: 30,
+    padding: 1,
+    elevation: 2,
   },
   itemRow: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#fff",
-    borderRadius: 10,
-    padding: 12,
-    marginBottom: 8,
+    borderRadius: 12,
+    padding: 14,
     elevation: 1,
-    justifyContent: "space-between",
   },
-  itemText: {
-    flex: 1,
-    fontSize: 16,
+  itemTitle: {
+    fontSize: 17,
     color: "#3E6A85",
     fontWeight: "bold",
-    marginLeft: 12,
+    marginBottom: 2,
+  },
+  itemInfo: {
+    fontSize: 14,
+    color: "#3ba4e6",
+    marginBottom: 2,
+  },
+  itemLembrete: {
+    fontSize: 13,
+    color: "#f44336",
+    fontStyle: "italic",
+    marginBottom: 2,
   },
   emptyText: {
     textAlign: "center",
@@ -70,17 +91,17 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   tabBar: {
-    
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "#e3f2fd",
     flexDirection: "row",
-    backgroundColor: "#fff",
-    paddingVertical: 10,
+    justifyContent: "space-around",
+    height: 60,
     borderTopWidth: 1,
-    borderTopColor: "#e3f2fd",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 3,
+    borderTopColor: "#cfd8dc",
+    paddingBottom: 4,
   },
   tabItem: {
     alignItems: "center",
@@ -93,6 +114,58 @@ const styles = StyleSheet.create({
     marginTop: 2,
     fontWeight: "bold",
   },
+  headerTitle: {
+    color: "#fff",
+    fontSize: 22,
+    fontWeight: "bold",
+    textAlign: "center"
+    
+  },
+  veiculoInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  veiculoInfoText: {
+    fontSize: 16,
+    color: "#3E6A85",
+    fontWeight: "bold",
+    marginLeft:4,
+  
+  }, 
+  placaText: {
+    fontSize: 14,
+    color: "#3ba4e6",
+    marginLeft: 30,
+    fontWeight: "bold",
+  },
+  saveButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  saveButton: {
+   backgroundColor: "#3E6A85",
+    borderRadius: 10,
+    padding: 10,
+    alignSelf: "flex-end",
+    marginTop: 4,
+  },
+  itemInfo: {
+    fontSize: 14,
+    color: "#3ba4e6",
+    marginBottom: 2
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: "#3E6A85",
+  }
 });
 
 export default styles;
