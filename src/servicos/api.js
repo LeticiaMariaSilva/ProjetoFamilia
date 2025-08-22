@@ -15,3 +15,6 @@ export const VeiculosApi = axios.create({
 export const PerfilApi = axios.create({
     baseURL: "https://api-gerenciador-familiar.vercel.app"
 })
+export const InicioApi = axios.create({
+    baseURL: "https://api-gerenciador-familiar.vercel.app"
+})

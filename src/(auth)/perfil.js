@@ -16,14 +16,9 @@ import { useIsFocused } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { PerfilApi } from "../servicos/api";
 import * as ImagePicker from "expo-image-picker";
+import { useAuth, useUser } from "@clerk/clerk-expo";
 
 
-const membros = [
-  { id: "1", nome: "Alex Silva", tipo: "Administrador" },
-  { id: "2", nome: "Maria Silva", tipo: "Mãe" },
-  { id: "3", nome: "Pedro Silva", tipo: "Filho" },
-  { id: "4", nome: "João Silva", tipo: "Filho" },
-];
 
 export default function Perfil({ route, navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
@@ -38,6 +33,8 @@ export default function Perfil({ route, navigation }) {
     "https://cdn-icons-png.flaticon.com/512/9131/9131529.png"
   );
   const [MostrarSenha, setMostrarSenha] = useState(false);
+  const {user} = useUser();
+  const { signOut} = useAuth()
 
   const isFocused = useIsFocused();
 
@@ -320,22 +317,6 @@ export default function Perfil({ route, navigation }) {
         </TouchableOpacity>
       </View>
 
-      {/* --- Membros da Família --- */}
-      <View style={styles.sectionCard}>
-        <View style={styles.sectionHeader}>
-          <Icon name="account-group-outline" size={22} color="#3ba4e6" />
-          <Text style={styles.sectionTitle}>Membros da Família</Text>
-        </View>
-        {membros.map((item) => (
-          <View key={item.id} style={styles.memberRow}>
-            <Icon name="account-circle" size={28} color="#6EBBEB" />
-            <View style={{ marginLeft: 10 }}>
-              <Text style={styles.memberName}>{item.nome}</Text>
-              <Text style={styles.memberType}>{item.tipo}</Text>
-            </View>
-          </View>
-        ))}
-      </View>
 
       {/* --- Sair da conta --- */}
       <TouchableOpacity style={styles.logoutBtn} onPress={sairConta}>

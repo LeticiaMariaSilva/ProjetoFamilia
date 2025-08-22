@@ -47,6 +47,43 @@ export default function Veiculo({ route, navigation }) {
     }
   }, [isFocused]);
 
+  // 🚀 TESTE AUTOMÁTICO DAS ROTAS
+  useEffect(() => {
+    const testarApi = async () => {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        const usuarioId = await AsyncStorage.getItem("userId");
+
+        console.log("🔑 Token:", token);
+        console.log("👤 UsuarioId:", usuarioId);
+
+        // --- TESTE 1: query string ---
+        try {
+          const res1 = await VeiculosApi.get(`/vehicles?usuarioId=${usuarioId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          console.log("✅ TESTE 1 OK (query string):", res1.data);
+        } catch (e) {
+          console.log("❌ TESTE 1 falhou (query string):", e.response?.data || e.message);
+        }
+
+        // --- TESTE 2: rota dinâmica ---
+        try {
+          const res2 = await VeiculosApi.get(`/vehicles/usuario/${usuarioId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          console.log("✅ TESTE 2 OK (rota dinâmica):", res2.data);
+        } catch (e) {
+          console.log("❌ TESTE 2 falhou (rota dinâmica):", e.response?.data || e.message);
+        }
+      } catch (err) {
+        console.log("Erro geral:", err.message);
+      }
+    };
+
+    testarApi();
+  }, []);
+
   const carregarVeiculos = async () => {
     setIsLoading(true);
     try {
@@ -62,7 +99,18 @@ export default function Veiculo({ route, navigation }) {
       const response = await VeiculosApi.get(`/vehicles`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setVeiculos(Array.isArray(response.data) ? response.data : []);
+
+      if (!Array.isArray(response.data)) {
+        setVeiculos([]);
+        return;
+      }
+
+      const veiculosUsuario = response.data.filter((v) => {
+        const usuarioId = v.userId ?? v.usuarioId ?? v.ownerId ?? v.user?.id;
+        return String(usuarioId) === userId;
+      });
+
+      setVeiculos(veiculosUsuario);
     } catch (error) {
       console.error("Erro ao carregar veículos:", {
         message: error.message,
@@ -71,8 +119,7 @@ export default function Veiculo({ route, navigation }) {
       });
       Alert.alert(
         "Erro",
-        error.response?.data?.message ||
-          `Não foi possível carregar os veículos.`
+        error.response?.data?.message || `Não foi possível carregar os veículos.`
       );
     } finally {
       setIsLoading(false);
@@ -89,7 +136,9 @@ export default function Veiculo({ route, navigation }) {
 
     try {
       const token = await AsyncStorage.getItem("token");
-      if (!token) {
+      const userId = await AsyncStorage.getItem("userId");
+
+      if (!token || !userId) {
         Alert.alert("Erro", "Faça o login novamente.");
         navigation.navigate("Login");
         return;
@@ -100,6 +149,7 @@ export default function Veiculo({ route, navigation }) {
         modelo,
         ano: anoNumero,
         placa,
+        usuarioId: userId, // ✅ Corrigido para bater com seu backend
       };
 
       if (editingVeiculosId) {
@@ -120,16 +170,13 @@ export default function Veiculo({ route, navigation }) {
         Alert.alert("Sucesso", "Veículo salvo com sucesso");
       }
 
-      // Resetar campos
       setMarca("");
       setModelo("");
       setAno("");
       setPlaca("");
       setEditingVeiculoId(null);
 
-      // Atualizar lista
       carregarVeiculos();
-
     } catch (error) {
       console.error("Erro ao salvar veículo:", {
         message: error.message,
@@ -138,50 +185,35 @@ export default function Veiculo({ route, navigation }) {
       });
       Alert.alert(
         "Erro",
-        error.response?.data?.message ||
-          `Não foi possível salvar o veículo.`
+        error.response?.data?.message || `Não foi possível salvar o veículo.`
       );
     }
   };
 
   const excluirVeiculo = async (id) => {
-    Alert.alert(
-      "Confirmar exclusão",
-      "Deseja realmente excluir este veículo? Todos os lembretes associados também serão excluídos.",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Excluir",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              const token = await AsyncStorage.getItem("token");
-              if (!token) {
-                Alert.alert("Erro", "Faça o login novamente.");
-                navigation.navigate("Login");
-                return;
-              }
-              await VeiculosApi.delete(`/delete-vehicle/${id}`, {
-                headers: { Authorization: `Bearer ${token}` },
-              });
-              carregarVeiculos();
-              Alert.alert("Sucesso", "Veículo excluído com sucesso");
-            } catch (error) {
-              console.error("Erro ao excluir veículo:", {
-                message: error.message,
-                status: error.response?.status,
-                data: error.response?.data,
-              });
-              Alert.alert(
-                "Erro",
-                error.response?.data?.message ||
-                  `Não foi possível excluir o veículo.`
-              );
-            }
-          }
-        }
-      ]
-    );
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        Alert.alert("Erro", "Faça o login novamente.");
+        navigation.navigate("Login");
+        return;
+      }
+      await VeiculosApi.delete(`/delete-vehicle/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      carregarVeiculos();
+      Alert.alert("Sucesso", "Veículo excluído com sucesso");
+    } catch (error) {
+      console.error("Erro ao excluir veículo:", {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+      });
+      Alert.alert(
+        "Erro",
+        error.response?.data?.message || `Não foi possível excluir o veículo.`
+      );
+    }
   };
 
   const editarVeiculo = (item) => {
@@ -192,12 +224,7 @@ export default function Veiculo({ route, navigation }) {
     setEditingVeiculoId(item.id);
   };
 
-  const navegarParaLembretes = (veiculo) => {
-    navigation.navigate("LembreteDeManutencao", {
-      veiculoSelecionado: veiculo
-    });
-  };
-
+  const navegarParaLembretes = (veiculo) => { navigation.navigate("LembreteDeManutencao", { veiculoSelecionado: veiculo }); };
   return (
     <View style={styles.bg}>
       <LinearGradient colors={["#3E6A85", "#3E6A85"]} style={styles.header}>
@@ -224,7 +251,7 @@ export default function Veiculo({ route, navigation }) {
           style={styles.input}
           placeholder="Ano"
           placeholderTextColor="#3ba4e6"
-          value={ano}
+          value={String(ano)}
           onChangeText={setAno}
           keyboardType="numeric"
         />
@@ -256,10 +283,7 @@ export default function Veiculo({ route, navigation }) {
           <Text style={styles.loadingText}>Carregando veículos...</Text>
         </View>
       ) : veiculos.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>Nenhum veículo cadastrado</Text>
-          <Text style={styles.emptySubText}>Cadastre seu primeiro veículo</Text>
-        </View>
+        <Text style={styles.emptyText}> Nenhum veículo cadastrado</Text>
       ) : (
         <FlatList
           data={veiculos}
@@ -271,18 +295,14 @@ export default function Veiculo({ route, navigation }) {
               style={styles.itemCard}
             >
               <View style={styles.itemRow}>
-                {/* Ícone do carro que navega para lembretes */}
-                <TouchableOpacity
-                  onPress={() => navegarParaLembretes(item)}
+                <TouchableOpacity onPress={() => navegarParaLembretes(item)} style={{ marginRight: 10 }} >
+                <Icon
+                  name="car"
+                  size={28}
+                  color="#3E6A85"
                   style={{ marginRight: 10 }}
-                >
-                  <Icon
-                    name="car"
-                    size={28}
-                    color="#3E6A85"
-                  />
+                />
                 </TouchableOpacity>
-                
                 <View style={{ flex: 1 }}>
                   <Text style={styles.itemTitle}>{item.marca}</Text>
                   {item.modelo ? (
@@ -295,16 +315,12 @@ export default function Veiculo({ route, navigation }) {
                     <Text style={styles.itemLembrete}>{item.placa}</Text>
                   ) : null}
                 </View>
-                
-                {/* Botão de editar */}
                 <TouchableOpacity
                   onPress={() => editarVeiculo(item)}
                   style={{ marginRight: 10 }}
                 >
                   <Icon name="pencil-outline" size={24} color="#4CAF50" />
                 </TouchableOpacity>
-                
-                {/* Botão de excluir */}
                 <TouchableOpacity onPress={() => excluirVeiculo(item.id)}>
                   <Icon name="delete-outline" size={24} color="#f44336" />
                 </TouchableOpacity>
@@ -313,7 +329,8 @@ export default function Veiculo({ route, navigation }) {
           )}
         />
       )}
-      
+
+
       <View style={styles.tabBar}>
         <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate("Inicio")}>
           <Icon name="home-outline" size={24} color="#3ba4e6" />

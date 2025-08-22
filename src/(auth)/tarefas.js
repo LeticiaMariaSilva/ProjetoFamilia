@@ -58,15 +58,17 @@ export default function Tarefas({ route, navigation }) {
 
       setTarefas(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
-      console.error("Erro ao carregar tarefas:", {
-        message: error.message,
-        status: error.response?.status,
-        data: error.response?.data,
-      });
-      Alert.alert(
-        "Erro",
-        error.response?.data?.message || "Não foi possível carregar as tarefas."
-      );
+      if (error.response?.status === 404) {
+        // Nenhuma tarefa encontrada → define array vazio
+        setTarefas([]);
+      } else {
+        console.error("Erro ao carregar tarefas:", error.response || error.message);
+        Alert.alert(
+          "Erro",
+          error.response?.data?.message || "Não foi possível carregar as tarefas."
+        );
+        setTarefas([]);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -136,7 +138,6 @@ export default function Tarefas({ route, navigation }) {
         return;
       }
 
-      // Envia status e descrição para evitar erro no backend
       await TarefasApi.put(
         `/update-task/${id}`,
         { descricao: descricaoAtual, status: !statusAtual },
@@ -236,7 +237,6 @@ export default function Tarefas({ route, navigation }) {
               style={styles.itemCard}
             >
               <View style={styles.itemRow}>
-                {/* Botão concluir/desmarcar */}
                 <TouchableOpacity
                   onPress={() => marcarFeito(item.id, item.status, item.descricao)}
                   accessibilityLabel={
@@ -256,7 +256,6 @@ export default function Tarefas({ route, navigation }) {
                   />
                 </TouchableOpacity>
 
-                {/* Texto da tarefa */}
                 <Text
                   style={[
                     styles.itemText,
@@ -269,7 +268,6 @@ export default function Tarefas({ route, navigation }) {
                   {item.descricao}
                 </Text>
 
-                {/* Botão editar */}
                 <TouchableOpacity
                   onPress={() => {
                     setDescricao(item.descricao);
@@ -280,7 +278,6 @@ export default function Tarefas({ route, navigation }) {
                   <Icon name="pencil-outline" size={22} color="#4caf50" />
                 </TouchableOpacity>
 
-                {/* Botão excluir */}
                 <TouchableOpacity
                   onPress={() => excluirTarefa(item.id)}
                   accessibilityLabel="Excluir tarefa"
@@ -292,14 +289,15 @@ export default function Tarefas({ route, navigation }) {
           )}
         />
       )}
+
       <View style={styles.tabBar}>
         <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate("Inicio")}>
           <Icon name="home-outline" size={24} color="#3ba4e6" />
           <Text style={styles.tabText}>Início</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.tabItem]} onPress={() => navigation.navigate("Compras")}>
+        <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate("Compras")}>
           <Icon name="cart-outline" size={24} color="#3ba4e6" />
-          <Text style={[styles.tabText, { color: "#3ba4e6" }]}>Compras</Text>
+          <Text style={styles.tabText}>Compras</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate("Veiculo")}>
           <Icon name="car-outline" size={24} color="#3ba4e6" />

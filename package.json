@@ -9,6 +9,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@clerk/clerk-expo": "^2.14.23",
     "@expo/metro-runtime": "~5.0.4",
     "@react-native-async-storage/async-storage": "^2.1.2",
     "@react-native-community/checkbox": "^0.5.20",
@@ -18,9 +19,13 @@
     "@react-navigation/native-stack": "^7.3.23",
     "axios": "^1.11.0",
     "expo": "53.0.20",
+    "expo-image-picker": "~16.1.4",
     "expo-linear-gradient": "~14.1.5",
+    "expo-linking": "^7.1.7",
     "expo-location": "^18.1.6",
+    "expo-secure-store": "^14.2.3",
     "expo-status-bar": "~2.2.3",
+    "expo-web-browser": "^14.2.0",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-native": "0.79.5",
@@ -31,8 +36,7 @@
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.11.1",
     "react-native-vector-icons": "^10.3.0",
-    "react-native-web": "^0.20.0",
-    "expo-image-picker": "~16.1.4"
+    "react-native-web": "^0.20.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
